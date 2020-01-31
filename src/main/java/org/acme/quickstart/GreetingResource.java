@@ -3,11 +3,18 @@ package org.acme.quickstart;
 import com.arangodb.next.communication.ArangoCommunication;
 import com.arangodb.next.communication.ArangoTopology;
 import com.arangodb.next.communication.CommunicationConfig;
-import com.arangodb.next.connection.*;
+import com.arangodb.next.connection.ArangoProtocol;
+import com.arangodb.next.connection.ArangoRequest;
+import com.arangodb.next.connection.ContentType;
+import com.arangodb.next.connection.HostDescription;
+import com.arangodb.next.entity.Version;
+import com.arangodb.next.entity.codec.ArangoDeserializer;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
@@ -15,13 +22,16 @@ import javax.ws.rs.core.MediaType;
 public class GreetingResource {
 
     @GET
+    @Path("/{host}/{port}")
     @Produces(MediaType.TEXT_PLAIN)
-    public String hello() {
-        getDbVersion().block();
-        return "hello";
+    public Publisher<String> hello(
+            @PathParam("host") String host,
+            @PathParam("port") int port
+    ) {
+        return getDbVersion(host, port);
     }
 
-    private static Mono<ArangoResponse> getDbVersion() {
+    private static Mono<String> getDbVersion(String host, int port) {
         final ArangoRequest REQUEST = ArangoRequest.builder()
                 .database("_system")
                 .path("/_api/version")
@@ -31,8 +41,7 @@ public class GreetingResource {
 
         ArangoCommunication communication = ArangoCommunication.create(
                 CommunicationConfig.builder()
-                        .addHosts(HostDescription.of("localhost", 8529))
-                        .authenticationMethod(AuthenticationMethod.ofBasic("root", "test"))
+                        .addHosts(HostDescription.of(host, port))
                         .topology(ArangoTopology.SINGLE_SERVER)
                         .acquireHostList(false)
                         .protocol(ArangoProtocol.HTTP)
@@ -40,7 +49,11 @@ public class GreetingResource {
         ).block();
 
         return communication.execute(REQUEST)
-                .doOnNext(v -> System.out.println("OK"));
+                .map(response -> {
+                    System.out.println("OK");
+                    ArangoDeserializer deserializer = ArangoDeserializer.of(ContentType.VPACK);
+                    return deserializer.deserialize(response.getBody(), Version.class).getServer();
+                });
     }
 
 }

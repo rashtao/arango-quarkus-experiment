@@ -10,6 +10,17 @@ If you want to learn more about Quarkus, please visit its website: https://quark
 docker run -e ARANGO_ROOT_PASSWORD=test -p 8529:8529 --rm arangodb:3.6
 ```
 
+## test
+
+```shell script
+mvn test
+```
+
+## test native
+
+```shell script
+mvn verify -Pnative
+```
 
 ## Running the application in dev mode
 
