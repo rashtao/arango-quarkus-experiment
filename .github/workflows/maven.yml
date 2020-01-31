@@ -1,0 +1,30 @@
+name: Native CI
+
+on: push
+
+jobs:
+
+  verify:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        java-version:
+          - java8
+          - java11
+        graalvm-version:
+          - 19.3.1
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup GraalVM CE
+        uses: rinx/setup-graalvm-ce@v0.0.1
+        with:
+          graalvm-version: ${{graalvm-version}}
+          java-version: ${{java-version}}
+      - name: setup-native-image
+        run: gu install native-image
+      - name: verify
+        run: mvn --no-transfer-progress verify -Pnative
