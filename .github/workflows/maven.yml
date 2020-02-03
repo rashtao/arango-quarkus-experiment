@@ -28,3 +28,5 @@ jobs:
         run: gu install native-image
       - name: verify
         run: mvn --no-transfer-progress verify -Pnative
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

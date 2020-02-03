@@ -34,7 +34,7 @@
         <dependency>
             <groupId>com.arangodb</groupId>
             <artifactId>arangodb-java-driver</artifactId>
-            <version>7.0.0-SNAPSHOT</version>
+            <version>7.0.0-20200203.102705-1</version>
             <exclusions>
                 <exclusion>
                     <groupId>io.netty</groupId>
@@ -134,4 +134,16 @@
             </properties>
         </profile>
     </profiles>
+
+    <repositories>
+        <repository>
+            <id>mirror-arangodb-java-driver</id>
+            <name>mirror-arangodb-java-driver</name>
+            <url>https://maven.pkg.github.com/ArangoDB-Community/mirror-arangodb-java-driver</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
 </project>
